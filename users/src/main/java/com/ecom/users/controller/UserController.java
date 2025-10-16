@@ -1,0 +1,46 @@
+package com.ecom.users.controller;
+
+
+import com.ecom.users.dto.EditPasswordDto;
+import com.ecom.users.dto.UserDto;
+import com.ecom.users.entity.User;
+import com.ecom.users.service.UserService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.security.NoSuchAlgorithmException;
+
+@AllArgsConstructor
+@RestController
+public class
+UserController {
+
+    private UserService userService;
+
+    @PostMapping(path = "/registration")
+    public ResponseEntity<?> inscription(@RequestBody User user) throws NoSuchAlgorithmException {
+        return ResponseEntity.ok().body(this.userService.registration(user));
+    }
+
+    @DeleteMapping(path = "/delete-user/{email}")
+    public ResponseEntity<?> removeUser(@PathVariable String email) {
+        return ResponseEntity.ok().body(this.userService.removeUser(email));
+    }
+
+    @GetMapping("/users-email/{email}")
+    public UserDto customerByEmail(@PathVariable String email){
+        return userService.userByEmail(email);
+    }
+
+    @PostMapping(path = "/edit-password")
+    public ResponseEntity<?> editPassword(@RequestBody EditPasswordDto editPasswordDto) {
+        return ResponseEntity.ok().body(this.userService.editPassword(editPasswordDto));
+    }
+
+    @PutMapping("/users-edit")
+    public ResponseEntity<?> updateProduct(@RequestBody UserDto userDto) {
+        return ResponseEntity.ok().body(this.userService.updateUser(userDto));
+    }
+
+}

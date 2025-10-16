@@ -1,0 +1,59 @@
+<mat-toolbar #toolbar color="primary" class="fixed-navbar">
+  <button mat-icon-button (click)="drawer.toggle()">
+    <mat-icon>menu</mat-icon>
+  </button>
+  <span class="spacer"></span>
+  <div *ngIf="authService.authenticated" routerLink="/panier" [matBadge]="cartService.sizeCaddyBackend || 0"
+       [matBadgeHidden]="(cartService.sizeCaddyBackend || 0) === 0"  matBadgeOverlap="small" class="clickable me-3" >
+    <i class="bi bi-bag"></i>
+  </div>
+  <div *ngIf="!authService.authenticated" routerLink="/panier"  [matBadge]="caddiesService.getTotalCaddy() || 0"
+       [matBadgeHidden]="(caddiesService.getTotalCaddy() || 0) === 0" matBadgeOverlap="small" class=" clickable me-3">
+    <i class="bi bi-bag"></i>
+  </div>
+  <button mat-button *ngIf="authService.authenticated" [matMenuTriggerFor]="importMenu">
+    <mat-icon iconPositionEnd>arrow_drop_down</mat-icon>{{ authService.username }}
+  </button>
+  <mat-menu #importMenu>
+    <button mat-menu-item routerLink="/customers/account">Mon compte</button>
+    <button (click)="logout()" mat-menu-item>Se déconnecter</button>
+  </mat-menu>
+  <button *ngIf="!authService.authenticated" mat-raised-button color="basic" class="mr-1 btn-menu-top" routerLink="/signup">Créer un compte</button>
+  <button *ngIf="!authService.authenticated" mat-raised-button color="basic" class="btn-menu-top" routerLink="/login">
+    Connexion
+  </button>
+</mat-toolbar>
+<mat-drawer-container class="drawer-container">
+  <mat-drawer #drawer position="start" [mode]="drawerMode" [opened]="drawerOpened" class="drawer">
+    <mat-nav-list class="mobileMode">
+      <mat-list-item>
+        <button mat-button routerLink="">
+          <mat-icon>dashboard</mat-icon>Accueil</button>
+      </mat-list-item>
+      <mat-list-item>
+        <button mat-button [routerLink]="authService.roles.includes('ADMIN') ? '/admin/dashboard' : '/products'"><mat-icon>confirmation_number</mat-icon>Billets</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.authenticated">
+        <button mat-button routerLink="/customers/commandes"><mat-icon>list</mat-icon>Mes commandes</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.roles.includes('ADMIN') || authService.roles.includes('AGENT')" >
+        <button mat-button routerLink="/customers/decode"><mat-icon>lock_open</mat-icon>Decode</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.roles.includes('ADMIN')">
+        <button  mat-button routerLink="/admin/add-product"><mat-icon>add_circle_outline</mat-icon>Ajouter produits</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.roles.includes('ADMIN')">
+        <button  mat-button routerLink="/admin/account">	<mat-icon>supervisor_account</mat-icon>Compte utilisateurs</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.roles.includes('ADMIN')">
+        <button  mat-button routerLink="/admin/allOrders"><mat-icon>payment</mat-icon >Toutes les commandes</button>
+      </mat-list-item>
+      <mat-list-item *ngIf="authService.roles.includes('ADMIN')">
+        <button  mat-button routerLink="/admin/analytics"><mat-icon>compare_arrows</mat-icon>Analytics</button>
+      </mat-list-item>
+    </mat-nav-list>
+  </mat-drawer>
+  <mat-drawer-content class="height-container drawer-content content-with-navbar">
+    <router-outlet></router-outlet>
+  </mat-drawer-content>
+</mat-drawer-container>

@@ -1,0 +1,9 @@
+# Ignorer les sous-projets git (microservices)
+cart/.git
+frontend-angular/.git
+orders/.git
+products/.git
+security/.git
+users/.git
+validation/.git
+

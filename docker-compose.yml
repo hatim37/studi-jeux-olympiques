@@ -1,0 +1,202 @@
+services:
+
+  db:
+    image: mysql:8.1
+    container_name: mysql-db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: root-password
+      MYSQL_DATABASE: jo_db
+      MYSQL_USER: studi-jo
+      MYSQL_PASSWORD: studi-pwd
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-uroot", "-proot-password" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin:5.2
+    container_name: phpmyadmin
+    restart: always
+    ports:
+      - "8081:80"
+    environment:
+      PMA_HOST: db
+      PMA_USER: root
+      PMA_PASSWORD: root-password
+    depends_on:
+      db:
+          condition: service_healthy
+
+  security-service:
+    build:
+      context: ./security
+      args:
+        SKIP_TESTS: "true"
+    container_name: security-service
+    ports:
+      - '8091:8091'
+    expose:
+      - '8091'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8091/api/actuator/health" ]
+      interval: 10s
+      retries: 3
+
+  users-service:
+    build:
+      context: ./users
+      args:
+        SKIP_TESTS: "true"
+    container_name: users-service
+    ports:
+      - '8090:8090'
+    expose:
+      - '8090'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      security-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8090/api/actuator/health" ]
+      interval: 10s
+      retries: 3
+
+  products-service:
+    build:
+      context: ./products
+      args:
+        SKIP_TESTS: "true"
+    container_name: products-service
+    ports:
+      - '8093:8093'
+    expose:
+      - '8093'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      users-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8093/api/actuator/health" ]
+      interval: 10s
+      retries: 3
+
+  validation-service:
+    build:
+      context: ./validation
+      args:
+        SKIP_TESTS: "true"
+    container_name: validation-service
+    ports:
+      - '8092:8092'
+    expose:
+      - '8092'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      products-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8092/api/actuator/health" ]
+      interval: 10s
+      retries: 3
+
+  cart-service:
+    build:
+      context: ./cart
+      args:
+        SKIP_TESTS: "true"
+    container_name: cart-service
+    ports:
+      - '8094:8094'
+    expose:
+      - '8094'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      validation-service:
+        condition: service_healthy
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:8094/api/actuator/health" ]
+      interval: 10s
+      retries: 3
+
+  orders-service:
+    build:
+      context: ./orders
+      args:
+        SKIP_TESTS: "true"
+    container_name: orders-service
+    ports:
+      - '8095:8095'
+    expose:
+      - '8095'
+    environment:
+      MYSQL_USER: studi-jo
+      MYSQL_PWD: studi-pwd
+      PROFIL: docker
+      SPRING_PROFILES_ACTIVE: docker
+      CLIENT_ID: security-service
+      CLIENT_SECRET: mySuperSecret
+      SAS_JWK_URI: http://security-service:8091/api/oauth2/jwks
+    depends_on:
+      cart-service:
+        condition: service_healthy
+
+  front-end-angular:
+    build:
+      context: ./frontend-angular
+      dockerfile: Dockerfile
+      args:
+        - BUILD_ENV=local
+    container_name: frontend-angular
+    ports:
+      - '8080:8080'
+    expose:
+      - '8080'
+
+volumes:
+  db_data:

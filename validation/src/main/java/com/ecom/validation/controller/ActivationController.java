@@ -1,0 +1,25 @@
+package com.ecom.validation.controller;
+
+import com.ecom.validation.service.ActivationService;
+import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+
+import java.util.Map;
+
+@AllArgsConstructor
+@RestController
+public class ActivationController {
+
+    private ActivationService activationService;
+
+    @PostMapping(path = "/activation-send")
+    public ResponseEntity<?> validCode(@RequestBody Map<String, String> code) {
+        String activationCode = code.get("code");
+        String password = code.get("password");
+        return ResponseEntity.ok().body(this.activationService.activation(activationCode, password));
+    }
+
+}
