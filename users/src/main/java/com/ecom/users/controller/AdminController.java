@@ -34,7 +34,7 @@ public class AdminController {
     @PostMapping("/admin/updateRoles/{userId}")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
     public ResponseEntity<?> updateRoles(@PathVariable Long userId, @RequestBody UpdateRolesDto rolesNames) {
-        return ResponseEntity.ok().body(this.adminService.adminAddRoleUsers(userId, rolesNames));
+        return this.adminService.adminAddRoleUsers(userId, rolesNames);
     }
 
 }

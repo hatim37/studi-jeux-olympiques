@@ -15,9 +15,9 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
 
     @Autowired
-    private UserRestClient userRepository;
+    UserRestClient userRepository;
     @Autowired
-    private TokenMicroService tokenMicroService;
+    TokenMicroService tokenMicroService;
 
 
     @Override

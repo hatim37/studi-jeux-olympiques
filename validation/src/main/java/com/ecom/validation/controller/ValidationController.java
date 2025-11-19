@@ -20,7 +20,7 @@ public class ValidationController {
     @PostMapping(path = "/validation-newSend")
     public ResponseEntity<?> newSendCode(@RequestBody Map<String, Long> id) {
         Long validationId = id.get("id");
-        return ResponseEntity.ok().body(this.validationService.sendNewCode(validationId));
+        return this.validationService.sendNewCode(validationId);
     }
 
 }

@@ -44,7 +44,7 @@ public class MicroServiceController {
 
     @PostMapping(path = "/_internal/new-password")
     public ResponseEntity<?> newPassword(@RequestBody NewPasswordDto newPasswordDto) {
-        return ResponseEntity.ok().body(this.userService.newPassword(newPasswordDto));
+        return this.userService.newPassword(newPasswordDto);
     }
 
 }

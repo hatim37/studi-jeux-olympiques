@@ -19,7 +19,7 @@ public class ActivationController {
     public ResponseEntity<?> validCode(@RequestBody Map<String, String> code) {
         String activationCode = code.get("code");
         String password = code.get("password");
-        return ResponseEntity.ok().body(this.activationService.activation(activationCode, password));
+        return this.activationService.activation(activationCode, password);
     }
 
 }

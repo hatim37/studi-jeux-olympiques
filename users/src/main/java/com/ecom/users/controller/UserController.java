@@ -20,12 +20,12 @@ UserController {
 
     @PostMapping(path = "/registration")
     public ResponseEntity<?> inscription(@RequestBody User user) throws NoSuchAlgorithmException {
-        return ResponseEntity.ok().body(this.userService.registration(user));
+        return this.userService.registration(user);
     }
 
     @DeleteMapping(path = "/delete-user/{email}")
     public ResponseEntity<?> removeUser(@PathVariable String email) {
-        return ResponseEntity.ok().body(this.userService.removeUser(email));
+        return this.userService.removeUser(email);
     }
 
     @GetMapping("/users-email/{email}")
@@ -35,12 +35,12 @@ UserController {
 
     @PostMapping(path = "/edit-password")
     public ResponseEntity<?> editPassword(@RequestBody EditPasswordDto editPasswordDto) {
-        return ResponseEntity.ok().body(this.userService.editPassword(editPasswordDto));
+        return this.userService.editPassword(editPasswordDto);
     }
 
     @PutMapping("/users-edit")
     public ResponseEntity<?> updateProduct(@RequestBody UserDto userDto) {
-        return ResponseEntity.ok().body(this.userService.updateUser(userDto));
+        return this.userService.updateUser(userDto);
     }
 
 }

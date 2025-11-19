@@ -2,6 +2,7 @@ package com.ecom.orders.service;
 
 import com.ecom.orders.clients.CartRestClient;
 import com.ecom.orders.clients.ProductRestClient;
+import com.ecom.orders.dto.AnalyticsResponse;
 import com.ecom.orders.dto.OrderDto;
 import com.ecom.orders.dto.ProductAnalyticsDto;
 import com.ecom.orders.entity.Order;
@@ -16,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -98,5 +100,32 @@ class AdminServiceIntegrationTest {
         // Vérification, liste non nulle
         assertThat(stats).isNotNull();
         assertThat(stats).isEmpty();
+    }
+
+    // 4 : Test : Vérifie la méthode calculateAnalytics()
+    @Test
+    void calculateAnalytics() {
+        // Simulation des dépendances
+        when(orderRepository.countByOrderStatus(OrderStatus.Valider)).thenReturn(5L);
+        when(orderRepository.findByDateBetweenAndOrderStatus(any(Date.class), any(Date.class), eq(OrderStatus.Valider)))
+                .thenReturn(List.of(order));
+
+        // Simulation d'une liste vide
+        when(cartRestClient.findByQrCodeIsNotNull(anyString())).thenReturn(List.of());
+        when(tokenTechnicService.getTechnicalToken()).thenReturn("token");
+
+        // Appel de la méthode
+        AnalyticsResponse response = adminService.calculateAnalytics();
+
+        // Vérifications
+        assertThat(response).isNotNull();
+        assertThat(response.getPlaced()).isEqualTo(5L);
+        assertThat(response.getCurrentMonthOrders()).isGreaterThanOrEqualTo(1L);
+        assertThat(response.getCurrentMonthEarnings()).isGreaterThanOrEqualTo(100L);
+        assertThat(response.getProductStats()).isNotNull();
+
+        // Vérifie que les dépendances ont bien été appelées
+        verify(orderRepository, times(1)).countByOrderStatus(OrderStatus.Valider);
+        verify(orderRepository, atLeastOnce()).findByDateBetweenAndOrderStatus(any(), any(), eq(OrderStatus.Valider));
     }
 }
